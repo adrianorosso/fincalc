@@ -2,10 +2,24 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeftIcon, HouseIcon, RotateCcwIcon } from "lucide-react";
+import {
+  ArrowLeftIcon,
+  ChartNoAxesCombinedIcon,
+  HouseIcon,
+  RotateCcwIcon,
+} from "lucide-react";
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
 import {
   Card,
   CardAction,
@@ -37,7 +51,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { calculateMortgage, type MortgageInputs } from "@/lib/mortgage";
+import {
+  buildMortgageSeries,
+  calculateMortgage,
+  type MortgageInputs,
+} from "@/lib/mortgage";
 import { formatCurrency } from "@/lib/utils";
 
 const DEFAULT_INPUTS: MortgageInputs = {
@@ -59,9 +77,21 @@ const TERM_OPTIONS = [
   { label: "30 years", value: "30" },
 ];
 
+const chartConfig = {
+  principalPaid: {
+    label: "Principal repaid",
+    color: "var(--chart-1)",
+  },
+  interestPaid: {
+    label: "Interest paid",
+    color: "var(--chart-2)",
+  },
+} satisfies ChartConfig;
+
 export default function MortgageRepaymentsCalculatorPage() {
   const [inputs, setInputs] = useState<MortgageInputs>(DEFAULT_INPUTS);
   const result = useMemo(() => calculateMortgage(inputs), [inputs]);
+  const series = useMemo(() => buildMortgageSeries(inputs), [inputs]);
 
   function update(field: keyof MortgageInputs) {
     return (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -417,6 +447,95 @@ export default function MortgageRepaymentsCalculatorPage() {
               </CardFooter>
             </Card>
           </div>
+
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle>How the loan is repaid</CardTitle>
+              <CardDescription>
+                Cumulative principal and interest across the{" "}
+                {Math.round(result.totalMonths / 12)}-year term.
+              </CardDescription>
+              <CardAction>
+                <Badge variant="outline">
+                  <ChartNoAxesCombinedIcon data-icon="inline-start" />
+                  Year by year
+                </Badge>
+              </CardAction>
+            </CardHeader>
+
+            <CardContent>
+              <ChartContainer config={chartConfig} className="h-[320px] w-full">
+                <AreaChart
+                  accessibilityLayer
+                  data={series}
+                  margin={{ top: 12, right: 12, left: 12 }}
+                >
+                  <CartesianGrid vertical={false} />
+                  <XAxis
+                    dataKey="year"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    minTickGap={24}
+                    tickFormatter={(value) => `Yr ${value}`}
+                  />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    width={72}
+                    tickFormatter={(value) => formatCurrency(Number(value))}
+                  />
+                  <ChartTooltip
+                    cursor={false}
+                    content={
+                      <ChartTooltipContent
+                        indicator="line"
+                        labelFormatter={(value) => `Year ${value}`}
+                        formatter={(value, name) => (
+                          <div className="flex w-full items-center justify-between gap-4">
+                            <span className="text-muted-foreground">
+                              {name}
+                            </span>
+                            <span className="font-mono font-medium text-foreground tabular-nums">
+                              {formatCurrency(Number(value))}
+                            </span>
+                          </div>
+                        )}
+                      />
+                    }
+                  />
+                  <ChartLegend content={<ChartLegendContent />} />
+                  <Area
+                    name="Principal repaid"
+                    dataKey="principalPaid"
+                    type="monotone"
+                    stroke="var(--color-principalPaid)"
+                    fill="var(--color-principalPaid)"
+                    fillOpacity={0.2}
+                    strokeWidth={2}
+                  />
+                  <Area
+                    name="Interest paid"
+                    dataKey="interestPaid"
+                    type="monotone"
+                    stroke="var(--color-interestPaid)"
+                    fill="var(--color-interestPaid)"
+                    fillOpacity={0.05}
+                    strokeWidth={2}
+                    strokeDasharray="4 4"
+                  />
+                </AreaChart>
+              </ChartContainer>
+            </CardContent>
+
+            <CardFooter>
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                Early payments are mostly interest. Over time, more of each
+                payment goes toward the principal.
+              </p>
+            </CardFooter>
+          </Card>
         </div>
       </section>
     </main>
