@@ -37,11 +37,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import {
-  calculateMortgage,
-  formatCurrency,
-  type MortgageInputs,
-} from "@/lib/mortgage";
+import { calculateMortgage, type MortgageInputs } from "@/lib/mortgage";
+import { formatCurrency } from "@/lib/utils";
 
 const DEFAULT_INPUTS: MortgageInputs = {
   homePrice: 350000,

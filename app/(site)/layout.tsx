@@ -43,6 +43,12 @@ export default function SiteLayout({
               Mortgage calculator
             </Link>
             <Link
+              href="/compound-interest-calculator"
+              className={buttonVariants({ variant: "ghost", size: "sm" })}
+            >
+              Compound interest calculator
+            </Link>
+            <Link
               href="/#how-it-works"
               className={buttonVariants({ variant: "ghost", size: "sm" })}
             >
@@ -95,6 +101,12 @@ export default function SiteLayout({
               className="text-sm text-muted-foreground hover:text-foreground"
             >
               Mortgage calculator
+            </Link>
+            <Link
+              href="/compound-interest-calculator"
+              className="text-sm text-muted-foreground hover:text-foreground"
+            >
+              Compound interest calculator
             </Link>
             <Link
               href="/#how-it-works"

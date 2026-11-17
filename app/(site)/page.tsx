@@ -361,15 +361,15 @@ export default function Home() {
                 <span className="text-xs text-muted-foreground">
                   Contributions · returns · time
                 </span>
-                <a
-                  href="#how-it-works"
+                <Link
+                  href="/compound-interest-calculator"
                   className={buttonVariants({
                     size: "sm",
                   })}
                 >
-                  See how it works
+                  Open calculator
                   <ArrowRightIcon data-icon="inline-end" />
-                </a>
+                </Link>
               </CardFooter>
             </Card>
           </div>
